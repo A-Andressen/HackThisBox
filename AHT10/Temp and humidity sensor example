@@ -1,0 +1,55 @@
+# Aaron Andressen
+#importing functions from the box
+import machine
+from time import sleep
+import utime
+from machine import Pin, I2C
+
+import ahtx0
+
+# I2C for
+i2c = I2C(1,scl=Pin(19), sda=Pin(18))
+
+# Create the sensor object using I2C
+sensor = ahtx0.AHT10(i2c)
+
+#lines 17-19 ask the sensor for new info
+Ctemp=sensor.temperature
+Ftemp=(Ctemp*1.8+32)
+humidity=sensor.relative_humidity
+
+#makes the while statement run infinitely; subject to change
+x = 6
+
+#loop that constantly asks for the humidity and temp from the sensor and posts it onto the terminal
+while(x < 7):
+    def temp():
+        Ctemp=sensor.temperature
+        Ftemp=(Ctemp*1.8+32)
+        humidity=sensor.relative_humidity
+            
+        print("\nTemperature: %0.2f C" % Ctemp)
+        print("Temperature: %0.2f F" % Ftemp)
+        print("Humidity: %0.2f %%" % humidity)
+        utime.sleep(1)
+        
+         #make the fan run if it's too hot
+        if Ctemp >= 28:
+                fan_speed = 500
+                f=machine.PWM(machine.Pin(4)); f.freq(20000)   # Fan
+
+                n=100 #fan speed
+                
+                #turns the fan on/increases fan efficacy after temperature threshold is reached
+                while Ctemp >= 28:
+                    x = 500
+                    print("fan_speed",n)
+                    f.duty_u16(fan_speed*256)
+                    print("too hot")
+                    Ctemp=sensor.temperature
+                #turns off the fan after the temp has lowered from the threshold. WAIT A WHILE AS IT TAKES 30-60 SECONDS FOR LINES 51-54 TO RUN
+                else:
+                    print("turn the Fan off")
+                    f.duty_u16(0)
+                    Ctemp=sensor.temperature
+    temp()
